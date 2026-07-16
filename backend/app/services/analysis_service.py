@@ -1,35 +1,31 @@
-"""Business logic for analyses.
+"""Business logic for analyses, backed by PostgreSQL."""
+from uuid import UUID
 
-For Phase 1 the data lives in memory. In Phase 2 this layer will be rewritten
-to talk to PostgreSQL, while the router above it stays unchanged.
-"""
-from datetime import datetime, timezone
-from uuid import UUID, uuid4
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.analysis import Analysis, AnalysisCreate
-
-
-class AnalysisService:
-    def __init__(self) -> None:
-        self._items: dict[UUID, Analysis] = {}
-
-    def create(self, data: AnalysisCreate) -> Analysis:
-        analysis = Analysis(
-            id=uuid4(),
-            text=data.text,
-            created_at=datetime.now(timezone.utc),
-        )
-        self._items[analysis.id] = analysis
-        return analysis
-
-    def list_all(self) -> list[Analysis]:
-        return list(self._items.values())
-
-    def get(self, analysis_id: UUID) -> Analysis | None:
-        return self._items.get(analysis_id)
-
-    def delete(self, analysis_id: UUID) -> bool:
-        return self._items.pop(analysis_id, None) is not None
+from app.models.analysis import Analysis
+from app.schemas.analysis import AnalysisCreate
 
 
-service = AnalysisService()
+async def create(db: AsyncSession, data: AnalysisCreate) -> Analysis:
+    analysis = Analysis(text=data.text)
+    db.add(analysis)
+    await db.commit()
+    await db.refresh(analysis)
+    return analysis
+
+
+async def list_all(db: AsyncSession) -> list[Analysis]:
+    result = await db.execute(select(Analysis).order_by(Analysis.created_at))
+    return list(result.scalars().all())
+
+
+async def get(db: AsyncSession, analysis_id: UUID) -> Analysis | None:
+    return await db.get(Analysis, analysis_id)
+
+
+async def remove(db: AsyncSession, analysis_id: UUID) -> bool:
+    result = await db.execute(delete(Analysis).where(Analysis.id == analysis_id))
+    await db.commit()
+    return result.rowcount > 0

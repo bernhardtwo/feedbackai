@@ -6,16 +6,16 @@ to validate incoming requests and to serialize outgoing responses.
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AnalysisCreate(BaseModel):
-    """Input schema: what a client must send to create an analysis."""
     text: str = Field(min_length=1, max_length=5000)
 
 
 class Analysis(BaseModel):
-    """Output schema: what the API returns for an analysis."""
+    model_config = ConfigDict(from_attributes=True)  # <-- nuevo
+
     id: UUID
     text: str
     created_at: datetime
