@@ -14,6 +14,7 @@ config = context.config
 from app.core.config import settings
 from app.db.base import Base
 from app.models.analysis import Analysis  # noqa: F401  registers the model on Base.metadata
+from app.models.topic import Topic  # noqa: F401  registers the model on Base.metadata
 
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
