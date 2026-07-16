@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:17
+    container_name: feedbackai-db
+    environment:
+      POSTGRES_USER: feedbackai
+      POSTGRES_PASSWORD: feedbackai
+      POSTGRES_DB: feedbackai
+    ports:
+      - "5432:5432"
+    volumes:
+      - feedbackai-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U feedbackai -d feedbackai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  feedbackai-db-data:
