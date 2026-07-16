@@ -5,6 +5,7 @@ description = "FeedbackAI backend — FastAPI service"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.5",
+    "anthropic>=0.116.0",
     "asyncpg>=0.31.0",
     "fastapi[standard]>=0.115",
     "pydantic-settings>=2.14.2",

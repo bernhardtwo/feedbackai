@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     database_url: str
-    test_database_url: str | None = None  # <-- nuevo, opcional
+    test_database_url: str | None = None
+    anthropic_api_key: str | None = None
 
 settings = Settings()
