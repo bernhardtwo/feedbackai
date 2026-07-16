@@ -13,9 +13,17 @@ class AnalysisCreate(BaseModel):
     text: str = Field(min_length=1, max_length=5000)
 
 
+class TopicRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    name: str
+
+
 class Analysis(BaseModel):
-    model_config = ConfigDict(from_attributes=True)  # <-- nuevo
+    model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     text: str
+    sentiment: str
+    summary: str
+    topics: list[TopicRead]
     created_at: datetime

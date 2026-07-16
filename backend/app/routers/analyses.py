@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.schemas.analysis import Analysis, AnalysisCreate
 from app.services import analysis_service
+from app.services.ai_service import AIServiceError, analyze_text
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 
@@ -15,7 +16,11 @@ router = APIRouter(prefix="/analyses", tags=["analyses"])
 async def create_analysis(
     payload: AnalysisCreate, db: AsyncSession = Depends(get_db)
 ) -> Analysis:
-    return await analysis_service.create(db, payload)
+    try:
+        result = await analyze_text(payload.text)
+    except AIServiceError:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail="AI analysis failed")
+    return await analysis_service.create(db, payload.text, result)
 
 
 @router.get("", response_model=list[Analysis])
